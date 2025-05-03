@@ -36,6 +36,12 @@ const typeof(INVALID_FILE_HANDLE) INVALID_HANDLE = INVALID_FILE_HANDLE; // shoul
 #endif
 
 
+inline std::string trim(const std::string &s)
+{
+   auto wsfront=std::find_if_not(s.begin(),s.end(),[](int c){return std::isspace(c);});
+   auto wsback=std::find_if_not(s.rbegin(),s.rend(),[](int c){return std::isspace(c);}).base();
+   return (wsback<=wsfront ? std::string() : std::string(wsfront,wsback));
+}
 
 
 static bool is_directory(PathAttributeType &attribute)
@@ -195,6 +201,10 @@ static void find_files_recursively(Directory &directory)
 				directory.folders.pop_back();
 			continue;
 		}
+		const std::string filename = fileEntry.path().filename().string();
+		const auto fileExt = fileEntry.path().extension();
+		if (!arguments.extensionFilter.size() || arguments.extensionFilter == string_to_lowercase(fileExt))
+			directory.files.emplace_back(filename);
 	}
 }
 
@@ -265,10 +275,10 @@ static bool decompile_files_recursively(const Directory &directory)
 			do
 			{
 				print("\nRetry? [Y]es/[N]o/[S]top >");
-				r = input();
+				r = trim(input());
 				std::transform(r.begin(), r.end(), r.begin(), [](char c)
 							   { return std::tolower(c); });
-			} while (r != "y" || r != "s" || r != "n");
+			} while (r != "y" && r != "s" && r != "n");
 
 			switch (r.at(0))
 			{
@@ -526,7 +536,15 @@ int main(int argc, char *argv[])
 	if (!arguments.outputPath.size()) // output path is empty
 	{
 #ifdef __linux__
-		arguments.outputPath = lnx::getExecutablePath() + "/output/";
+	//arguments.outputPath = lnx::getExecutablePath() + "/output/";
+		arguments.outputPath = lnx::getCWD() + "/output/";
+		auto mres = mkdir(arguments.outputPath.c_str(),0755);
+		if ((mres != 0 && errno != EEXIST) || stat(arguments.outputPath.c_str(), &pathAttributes) != 0)
+		{
+			perror("stat() call failed after creating dir or mkdir failed");
+			return EXIT_FAILURE;
+		}
+
 #elif _WIN32
 		arguments.outputPath.resize(MAX_PATH);
 		GetModuleFileNameA(NULL, arguments.outputPath.data(), arguments.outputPath.size());
@@ -553,7 +571,9 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 #else
-		if (stat(arguments.outputPath.c_str(), &pathAttributes) != 0)
+		auto mres = mkdir(arguments.outputPath.c_str(),0755);
+		
+		if ((mres != 0 && errno != EEXIST) || stat(arguments.outputPath.c_str(), &pathAttributes) != 0)
 		{
 			perror("stat() call failed");
 			return EXIT_FAILURE;

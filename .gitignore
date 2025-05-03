@@ -399,3 +399,9 @@ FodyWeavers.xsd
 
 *.sln
 *.vcxproj*
+
+example_luas/*
+example_output/*
+output/*
+*.o
+bin/*

@@ -22,7 +22,13 @@ namespace lnx {
         throw std::system_error(ec,"Couldn't get executable path. fs::canonical returned error code." );
         return p.parent_path().string();
     }
-    
+
+    std::string getCWD()
+    {
+        return fs::current_path().string();
+
+    }
+
     std::string getPathFileName(std::string path) {
         auto p = fs::path(path);
         return p.filename();

@@ -1150,8 +1150,8 @@ void Lua::create_file()
 	}
 #endif
 	// file = CreateFileA(filePath.c_str(), GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-	file = std::ofstream(filePath.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
-	assert(!file.is_open(), "Unable to create file", filePath, DEBUG_INFO);
+	file.open(filePath.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+	assert(file.is_open(), std::string("Unable to create file ").c_str(), filePath, DEBUG_INFO);
 }
 
 void Lua::close_file()
@@ -1166,7 +1166,8 @@ void Lua::write_file()
 {
 	// DWORD charsWritten = 0;
 	// assert(WriteFile(file, writeBuffer.data(), writeBuffer.size(), &charsWritten, NULL) && !(writeBuffer.size() - charsWritten), "Failed writing to file", filePath, DEBUG_INFO);
-	assert(!file.write(writeBuffer.data(), writeBuffer.size()), "Failed writing to file", filePath, DEBUG_INFO);
+	file.write(writeBuffer.data(), writeBuffer.size());
+	assert(file.is_open(), "Failed writing to file", filePath, DEBUG_INFO);
 	writeBuffer.clear();
 	writeBuffer.shrink_to_fit();
 }
