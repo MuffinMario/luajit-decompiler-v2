@@ -21,7 +21,7 @@ private:
 	void write_prefix_expression(const Expression& expression, const bool& isLineStart);
 	void write_variable(const Variable& variable, const bool& isLineStart);
 	void write_function_call(const FunctionCall& functionCall, const bool& isLineStart);
-	void write_assignment(const std::vector<Variable>& variables, const std::vector<Expression*>& expressions, const std::string& seperator, const bool& isLineStart);
+	void write_assignment(const std::vector<Variable>& variables, const std::vector<Expression*>& expressions, const std::string& separator, const bool& isLineStart);
 	void write_expression_list(const std::vector<Expression*>& expressions, const Expression* const& multres);
 	void write_function_definition(const Function& function, const bool& isMethod);
 	void write_number(const double& number);

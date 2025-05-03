@@ -35,6 +35,7 @@ const char PATH_SEPARATOR = '\\';
 const typeof(INVALID_FILE_HANDLE) INVALID_HANDLE = INVALID_FILE_HANDLE; // should be HANDLE -> LPVOID
 #endif
 
+std::string input();
 
 inline std::string trim(const std::string &s)
 {
@@ -340,10 +341,8 @@ static char *parse_arguments(const int &argc, char **const &argv)
 	{
 		argument = argv[i];
 
-		if (argument.size() >= 2 || argument.front() == '-')
-		{
-			if (argument[1] == '-')
-			{
+		if (argument.size() >= 2 && argument.front() == '-') {
+			if (argument[1] == '-') {
 				argument = argument.c_str() + 2;
 
 				if (argument == "extension")
@@ -373,11 +372,9 @@ static char *parse_arguments(const int &argc, char **const &argv)
 				else if (argument == "minimize_diffs")
 				{
 					arguments.minimizeDiffs = true;
-				}
-				else if (argument == "output")
-				{
-					if (i <= argc - 2)
-					{
+					continue;
+				} else if (argument == "output") {
+					if (i <= argc - 2) {
 						i++;
 						arguments.outputPath = argv[i];
 						continue;
@@ -464,12 +461,14 @@ int main(int argc, char *argv[])
 #elif _WIN32
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 	{
+		HWND window = GetConsoleWindow();
 		DWORD consoleProcessId;
-		GetWindowThreadProcessId(GetConsoleWindow(), &consoleProcessId);
+		GetWindowThreadProcessId(window, &consoleProcessId);
 #ifdef _DEBUG
 		isCommandLine = false;
 #else
 		isCommandLine = consoleProcessId != GetCurrentProcessId();
+		if (!isCommandLine) SetWindowTextA(window, PROGRAM_NAME);
 #endif
 	}
 

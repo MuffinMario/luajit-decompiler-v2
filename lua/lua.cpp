@@ -823,18 +823,15 @@ void Lua::write_function_call(const FunctionCall &functionCall, const bool &isLi
 	write(")");
 }
 
-void Lua::write_assignment(const std::vector<Variable> &variables, const std::vector<Expression *> &expressions, const std::string &seperator, const bool &isLineStart)
-{
-	for (uint8_t i = 0; i < variables.size(); i++)
-	{
+void Lua::write_assignment(const std::vector<Variable>& variables, const std::vector<Expression*>& expressions, const std::string& separator, const bool& isLineStart) {
+	for (uint8_t i = 0; i < variables.size(); i++) {
 		write_variable(variables[i], i ? false : isLineStart);
 		if (i != variables.size() - 1)
 			write(", ");
 	}
 
-	if (!expressions.size())
-		return;
-	write(seperator);
+	if (!expressions.size()) return;
+	write(separator);
 
 	for (uint8_t i = 0; i < expressions.size(); i++)
 	{
@@ -936,6 +933,14 @@ void Lua::write_function_definition(const Function &function, const bool &isMeth
 
 void Lua::write_number(const double &number)
 {
+	static const auto try_string_to_number = [](const std::string& string, const double& number)->bool {
+		try {
+			return std::stod(string) == number;
+		} catch (...) {
+			return false;
+		}
+	};
+
 	const uint64_t rawDouble = std::bit_cast<uint64_t>(number);
 
 	if ((rawDouble & DOUBLE_EXPONENT) == DOUBLE_SPECIAL)
@@ -948,16 +953,14 @@ void Lua::write_number(const double &number)
 	string.resize(std::snprintf(nullptr, 0, "%1.15g", number));
 	std::snprintf(string.data(), string.size() + 1, "%1.15g", number);
 
-	if (std::stod(string) != number)
-	{
+	if (!try_string_to_number(string, number)) {
 		string.resize(std::snprintf(nullptr, 0, "%1.16g", number));
 		std::snprintf(string.data(), string.size() + 1, "%1.16g", number);
 
-		if (std::stod(string) != number)
-		{
+		if (!try_string_to_number(string, number)) {
 			string.resize(std::snprintf(nullptr, 0, "%1.17g", number));
 			std::snprintf(string.data(), string.size() + 1, "%1.17g", number);
-			assert(std::stod(string) == number, "Failed to convert number to valid string", filePath, DEBUG_INFO);
+			assert(try_string_to_number(string, number), "Failed to convert number to valid string", filePath, DEBUG_INFO);
 		}
 	}
 

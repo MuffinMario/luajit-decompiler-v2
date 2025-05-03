@@ -8,6 +8,7 @@ struct Local {
 
 struct SlotScope {
 	SlotScope* slotScope = this;
+	std::vector<SlotScope**> mergedScopes;
 	std::string name;
 	uint32_t scopeBegin = INVALID_ID;
 	uint32_t scopeEnd = INVALID_ID;
@@ -345,6 +346,13 @@ struct Function {
 				for (uint32_t j = slotInfos[i].slotScopes.size() - 1; j-- && (*slotInfos[i].slotScopes[j])->scopeBegin <= id;) {
 					(*slotInfos[i].activeSlotScope)->scopeEnd = (*slotInfos[i].slotScopes[j])->scopeEnd;
 					(*slotInfos[i].activeSlotScope)->usages += (*slotInfos[i].slotScopes[j])->usages + 1;
+
+					for (uint32_t k = (*slotInfos[i].slotScopes[j])->mergedScopes.size(); k--;) {
+						*(*slotInfos[i].slotScopes[j])->mergedScopes[k] = *slotInfos[i].activeSlotScope;
+					}
+
+					(*slotInfos[i].activeSlotScope)->mergedScopes.insert((*slotInfos[i].activeSlotScope)->mergedScopes.end(), (*slotInfos[i].slotScopes[j])->mergedScopes.begin(), (*slotInfos[i].slotScopes[j])->mergedScopes.end());
+					(*slotInfos[i].activeSlotScope)->mergedScopes.emplace_back(&(*slotInfos[i].slotScopes[j])->slotScope);
 					*slotInfos[i].slotScopes[j] = *slotInfos[i].activeSlotScope;
 					slotInfos[i].slotScopes.erase(slotInfos[i].slotScopes.begin() + j);
 				}

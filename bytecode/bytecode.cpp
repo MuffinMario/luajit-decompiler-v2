@@ -52,8 +52,8 @@ void Bytecode::read_prototypes() {
 	assert(unlinkedPrototypes.size() == 1, "Failed to link main prototype", filePath, DEBUG_INFO);
 	main = unlinkedPrototypes.back();
 	assert((main->header.flags & BC_PROTO_VARARG)
-		&& main->header.parameters == 0
-		&& main->upvalues.size() == 0,
+		&& !main->header.parameters
+		&& !main->upvalues.size(),
 		"Main prototype has invalid header", filePath, DEBUG_INFO);
 	prototypes.shrink_to_fit();
 }

@@ -137,9 +137,8 @@ void Ast::assign_debug_info(Function& function) {
 
 	for (uint32_t i = function.parameterNames.size(); i < function.prototype.variableInfos.size(); i++) {
 		assert(!activeLocalScopes.size()
-			|| function.prototype.variableInfos[i].scopeBegin > activeLocalScopes.back()
-			|| function.prototype.variableInfos[i].scopeEnd <= activeLocalScopes.back()
-			|| function.prototype.variableInfos[i].scopeBegin == activeLocalScopes.back(),
+			|| function.prototype.variableInfos[i].scopeBegin >= activeLocalScopes.back()
+			|| function.prototype.variableInfos[i].scopeEnd <= activeLocalScopes.back(),
 			"Illegal variable scope border overlap", bytecode.filePath, DEBUG_INFO);
 
 		while (activeLocalScopes.size() && function.prototype.variableInfos[i].scopeEnd > activeLocalScopes.back()) {
@@ -1342,6 +1341,13 @@ void Ast::build_slot_scopes(Function& function, std::vector<Statement*>& block, 
 
 										while (function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back() != targetSlotScope) {
 											(*targetSlotScope)->usages += (*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back())->usages + 1;
+
+											for (uint32_t k = (*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back())->mergedScopes.size(); k--;) {
+												*(*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back())->mergedScopes[k] = *targetSlotScope;
+											}
+
+											(*targetSlotScope)->mergedScopes.insert((*targetSlotScope)->mergedScopes.begin(), (*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back())->mergedScopes.begin(), (*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back())->mergedScopes.end());
+											(*targetSlotScope)->mergedScopes.emplace_back(&(*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back())->slotScope);
 											*function.slotScopeCollector.slotInfos[targetSlot].slotScopes.back() = *targetSlotScope;
 											function.slotScopeCollector.slotInfos[targetSlot].slotScopes.pop_back();
 										}
@@ -1375,7 +1381,15 @@ void Ast::build_slot_scopes(Function& function, std::vector<Statement*>& block, 
 		for (uint8_t j = block[i]->assignment.variables.size(); j--;) {
 			switch (block[i]->assignment.variables[j].type) {
 			case AST_VARIABLE_SLOT:
+				if (block[i]->type != AST_STATEMENT_DECLARATION || function.slotScopeCollector.slotInfos[block[i]->assignment.variables[j].slot].minScopeBegin >= id) {
+					function.slotScopeCollector.close_scope(block[i]->assignment.variables[j].slot, block[i]->assignment.variables[j].slotScope, id);
+					continue;
+				}
+				
+				index = function.slotScopeCollector.slotInfos[block[i]->assignment.variables[j].slot].minScopeBegin;
+				function.slotScopeCollector.slotInfos[block[i]->assignment.variables[j].slot].minScopeBegin = INVALID_ID;
 				function.slotScopeCollector.close_scope(block[i]->assignment.variables[j].slot, block[i]->assignment.variables[j].slotScope, id);
+				function.slotScopeCollector.slotInfos[block[i]->assignment.variables[j].slot].minScopeBegin = index;
 				continue;
 			case AST_VARIABLE_TABLE_INDEX:
 				function.slotScopeCollector.add_to_scope(block[i]->assignment.variables[j].table->variable->slot, block[i]->assignment.variables[j].table->variable->slotScope, id);
@@ -1390,14 +1404,6 @@ void Ast::build_slot_scopes(Function& function, std::vector<Statement*>& block, 
 				&& (!function.slotScopeCollector.slotInfos[block[i]->assignment.variables.front().slot].activeSlotScope
 					|| *function.slotScopeCollector.slotInfos[block[i]->assignment.variables.front().slot].activeSlotScope != *block[i]->assignment.variables.front().slotScope)),
 			"Multres assignment has invalid number of usages", bytecode.filePath, DEBUG_INFO);
-
-		if (block[i]->type == AST_STATEMENT_DECLARATION && function.slotScopeCollector.slotInfos[block[i]->assignment.variables.back().slot].activeSlotScope) {
-			index = function.slotScopeCollector.slotInfos[block[i]->assignment.variables.back().slot].minScopeBegin;
-			function.slotScopeCollector.slotInfos[block[i]->assignment.variables.back().slot].minScopeBegin = INVALID_ID;
-			function.slotScopeCollector.close_scope(block[i]->assignment.variables.back().slot, block[i]->assignment.variables.back().slotScope, id);
-			(*block[i]->assignment.variables.back().slotScope)->usages--;
-			function.slotScopeCollector.slotInfos[block[i]->assignment.variables.back().slot].minScopeBegin = index;
-		}
 
 		for (uint8_t j = block[i]->assignment.openSlots.size(); j--;) {
 			function.slotScopeCollector.add_to_scope((*block[i]->assignment.openSlots[j])->variable->slot, (*block[i]->assignment.openSlots[j])->variable->slotScope, id);
