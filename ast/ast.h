@@ -1,31 +1,39 @@
+
+// required types/enums/vars for other files ...
+struct Local;
+struct SlotScope;
+struct ConditionBuilder;
+
+struct Expression;
+struct Constant;
+struct Variable;
+struct FunctionCall;
+struct Table;
+struct BinaryOperation;
+struct UnaryOperation;
+struct Statement;
+struct Function;
+
+const constexpr uint32_t INVALID_ID = -1;
+
+enum CONSTANT_TYPE {
+	INVALID_CONSTANT,
+	NIL_CONSTANT,
+	BOOL_CONSTANT,
+	NUMBER_CONSTANT
+};
+
+#include "building_blocks.h"
+#include "function.h"
+
+
 class Ast {
 private:
 
-	static constexpr uint32_t INVALID_ID = -1;
 
-	enum CONSTANT_TYPE {
-		INVALID_CONSTANT,
-		NIL_CONSTANT,
-		BOOL_CONSTANT,
-		NUMBER_CONSTANT
-	};
 
-	struct Local;
-	struct SlotScope;
-	struct ConditionBuilder;
 
 public:
-	struct Expression;
-	struct Constant;
-	struct Variable;
-	struct FunctionCall;
-	struct Table;
-	struct BinaryOperation;
-	struct UnaryOperation;
-	struct Statement;
-	struct Function;
-	#include "building_blocks.h"
-	#include "function.h"
 
 	Ast(const Bytecode& bytecode, const bool& ignoreDebugInfo, const bool& minimizeDiffs);
 	~Ast();
@@ -36,7 +44,6 @@ public:
 
 private:
 
-	#include "conditionBuilder.h";
 
 	struct BlockInfo {
 		uint32_t index = INVALID_ID;
@@ -44,7 +51,7 @@ private:
 		BlockInfo* const previousBlock;
 	};
 
-	Function*& new_function(const Bytecode::Prototype& prototype, const uint32_t& level);
+	Function*& new_function(const Prototype& prototype, const uint32_t& level);
 	Statement*& new_statement(const AST_STATEMENT& type);
 	Expression*& new_expression(const AST_EXPRESSION& type);
 	void build_functions(Function& function, uint32_t& functionCounter);
@@ -87,4 +94,9 @@ private:
 	std::vector<Function*> functions;
 	std::vector<Expression*> expressions;
 	uint64_t prototypeDataLeft = 0;
+
+
+	friend class ConditionBuilder;
 };
+
+#include "conditionBuilder.h"

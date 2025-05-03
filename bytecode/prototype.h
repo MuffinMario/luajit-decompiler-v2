@@ -1,4 +1,4 @@
-class Bytecode::Prototype {
+class Prototype {
 public:
 
 	Prototype(const Bytecode& bytecode);
@@ -16,7 +16,7 @@ public:
 
 	std::vector<Instruction> instructions;
 	std::vector<uint16_t> upvalues;
-	std::vector<Constant> constants;
+	std::vector<BConstant> constants;
 	std::vector<NumberConstant> numberConstants;
 	std::vector<uint32_t> lineMap;
 	std::vector<std::string> upvalueNames;

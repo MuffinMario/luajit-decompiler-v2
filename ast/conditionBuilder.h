@@ -1,4 +1,4 @@
-struct Ast::ConditionBuilder {
+struct ConditionBuilder {
 	enum TYPE {
 		ASSIGNMENT,
 		STATEMENT
@@ -86,33 +86,33 @@ struct Ast::ConditionBuilder {
 		return nodes.emplace_back(new Node(type));
 	}
 
-	static Node::TYPE get_node_type(const Bytecode::BC_OP& instruction, const bool& swapped) {
+	static Node::TYPE get_node_type(const BC_OP& instruction, const bool& swapped) {
 		switch (instruction) {
-		case Bytecode::BC_OP_ISLT:
+		case BC_OP::BC_OP_ISLT:
 			return swapped ? Node::GREATER_THEN : Node::LESS_THAN;
-		case Bytecode::BC_OP_ISGE:
+		case BC_OP::BC_OP_ISGE:
 			return swapped ? Node::NOT_GREATER_THEN : Node::NOT_LESS_THAN;
-		case Bytecode::BC_OP_ISLE:
+		case BC_OP::BC_OP_ISLE:
 			return swapped ? Node::GREATER_EQUAL : Node::LESS_EQUAL;
-		case Bytecode::BC_OP_ISGT:
+		case BC_OP::BC_OP_ISGT:
 			return swapped ? Node::NOT_GREATER_EQUAL : Node::NOT_LESS_EQUAL;
-		case Bytecode::BC_OP_ISEQV:
-		case Bytecode::BC_OP_ISEQS:
-		case Bytecode::BC_OP_ISEQN:
-		case Bytecode::BC_OP_ISEQP:
+		case BC_OP::BC_OP_ISEQV:
+		case BC_OP::BC_OP_ISEQS:
+		case BC_OP::BC_OP_ISEQN:
+		case BC_OP::BC_OP_ISEQP:
 			return Node::EQUAL;
-		case Bytecode::BC_OP_ISNEV:
-		case Bytecode::BC_OP_ISNES:
-		case Bytecode::BC_OP_ISNEN:
-		case Bytecode::BC_OP_ISNEP:
+		case BC_OP::BC_OP_ISNEV:
+		case BC_OP::BC_OP_ISNES:
+		case BC_OP::BC_OP_ISNEN:
+		case BC_OP::BC_OP_ISNEP:
 			return Node::NOT_EQUAL;
-		case Bytecode::BC_OP_ISTC:
-		case Bytecode::BC_OP_IST:
+		case BC_OP::BC_OP_ISTC:
+		case BC_OP::BC_OP_IST:
 			return Node::TRUTHY_TEST;
-		case Bytecode::BC_OP_ISFC:
-		case Bytecode::BC_OP_ISF:
+		case BC_OP::BC_OP_ISFC:
+		case BC_OP::BC_OP_ISF:
 			return Node::FALSY_TEST;
-		case Bytecode::BC_OP_JMP:
+		case BC_OP::BC_OP_JMP:
 			return Node::UNCONDITIONAL;
 		default:
 			throw nullptr;

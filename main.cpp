@@ -12,19 +12,62 @@ struct Error
 	const std::string source;
 	const std::string line;
 };
+#ifdef __linux__
+
+using HandleType = FILE *;
+using PathAttributeType = struct stat;
+
+using FlagType = int;
+
+const char PATH_SEPARATOR = '/';
+
+const int INVALID_HANDLE = -1;
+
+#elif _WIN32
+
+using HandleType = HANDLE;
+using PathAttributeType = DWORD;
+
+using FlagType = DWORD;
+
+const char PATH_SEPARATOR = '\\';
+
+const typeof(INVALID_FILE_HANDLE) INVALID_HANDLE = INVALID_FILE_HANDLE; // should be HANDLE -> LPVOID
+#endif
+
+
+
+
+static bool is_directory(PathAttributeType &attribute)
+{
+#ifdef _WIN32
+	return attribute & FILE_ATTRIBUTE_DIRECTORY;
+#else
+	return S_ISDIR(attribute.st_mode) != 0;
+#endif
+}
+
+static bool is_file(PathAttributeType &attribute)
+{
+#ifdef _WIN32
+	return attribute & INVALID_FILE_ATTRIBUTES == 0 && is_directory(attribute) == false;
+#else
+	return S_ISREG(attribute.st_mode) != 0;
+#endif
+}
 
 #ifdef __linux__
-static const XPlat::HandleType CONSOLE_OUTPUT = stdout;
-static const XPlat::HandleType CONSOLE_INPUT = stdin;
+static const HandleType CONSOLE_OUTPUT = stdout;
+static const HandleType CONSOLE_INPUT = stdin;
 #elif _WIN32
-static const XPlat::HandleType CONSOLE_OUTPUT = GetStdHandle(STD_OUTPUT_HANDLE);
-static const XPlat::HandleType CONSOLE_INPUT = GetStdHandle(STD_INPUT_HANDLE);
+static const HandleType CONSOLE_OUTPUT = GetStdHandle(STD_OUTPUT_HANDLE);
+static const HandleType CONSOLE_INPUT = GetStdHandle(STD_INPUT_HANDLE);
 #endif
 static bool isCommandLine;
 static bool isProgressBarActive = false;
 static uint32_t filesSkipped = 0;
 
-void WriteToConsole(XPlat::HandleType h, const char *msg, size_t msglen)
+void WriteToConsole(HandleType h, const char *msg, size_t msglen)
 {
 #ifdef __linux__
 	auto fd = fileno(h);
@@ -90,13 +133,12 @@ static std::string &append_file_separator(std::string &str)
 #endif
 		break;
 	default:
-		str += XPlat::PATH_SEPARATOR;
+		str += PATH_SEPARATOR;
 		break;
 	}
 
 	return str;
 }
-
 
 static void find_files_recursively(Directory &directory)
 {
@@ -118,7 +160,7 @@ static void find_files_recursively(Directory &directory)
 			if (!std::strcmp(pathData.cFileName, ".") || !std::strcmp(pathData.cFileName, ".."))
 				continue;
 			// add folder to dir and enter next recursion step with it
-			directory.folders.emplace_back(Directory{.path = directory.path + pathData.cFileName + XPlat::PATH_SEPARATOR});
+			directory.folders.emplace_back(Directory{.path = directory.path + pathData.cFileName + PATH_SEPARATOR});
 			find_files_recursively(directory.folders.back());
 
 			// if no files/folders inside this folder have been found, remove again
@@ -145,7 +187,7 @@ static void find_files_recursively(Directory &directory)
 			if (!std::strcmp(filename.c_str(), ".") || !std::strcmp(filename.c_str(), ".."))
 				continue;
 			// add folder to dir and enter next recursion step with it
-			directory.folders.emplace_back(Directory{.path = directory.path + filename + XPlat::PATH_SEPARATOR});
+			directory.folders.emplace_back(Directory{.path = directory.path + filename + PATH_SEPARATOR});
 			find_files_recursively(directory.folders.back());
 
 			// if no files/folders inside this folder have been found, remove again
@@ -171,11 +213,11 @@ static bool decompile_files_recursively(const Directory &directory)
 	for (uint32_t i = 0; i < directory.files.size(); i++)
 	{
 		outputFile = directory.files[i];
-		#ifdef _WIN32
+#ifdef _WIN32
 		PathRemoveExtensionA(outputFile.data());
-		#else
+#else
 		outputFile = lnx::stripExtension(outputFile);
-		#endif
+#endif
 		outputFile = outputFile.c_str();
 		outputFile += ".lua";
 
@@ -474,12 +516,12 @@ int main(int argc, char *argv[])
 
 #else
 		// don't offer file open dialog outside of windows os
-		return;
+		return EXIT_FAILURE;
 
 #endif
 	}
 
-	XPlat::PathAttributeType pathAttributes;
+	PathAttributeType pathAttributes;
 
 	if (!arguments.outputPath.size()) // output path is empty
 	{
@@ -561,7 +603,7 @@ int main(int argc, char *argv[])
 
 	Directory root;
 
-	if (XPlat::is_directory(pathAttributes)) // dirtype
+	if (is_directory(pathAttributes)) // dirtype
 	{
 		append_file_separator(arguments.inputPath);
 

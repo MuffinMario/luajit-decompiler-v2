@@ -18,6 +18,32 @@ Requirements:
 #include <unordered_map>
 #include <vector>
 
+
+#include <inttypes.h>
+#ifdef __linux__
+
+#include <unistd.h>
+#include <termios.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <fcntl.h>
+
+#include "linux_util.h"
+
+#elif _WIN32
+#pragma comment(linker, "/stack:268435456")
+#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#pragma comment(lib, "shlwapi.lib")
+
+#include <windows.h>
+#include <fileapi.h>
+#include <shlwapi.h>
+#else
+#error
+#endif
+
+
+
 #define DEBUG_INFO __FUNCTION__, __FILE__, __LINE__
 
 constexpr char PROGRAM_NAME[] = "LuaJIT Decompiler v2";

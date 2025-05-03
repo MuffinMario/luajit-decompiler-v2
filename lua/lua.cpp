@@ -34,9 +34,9 @@ void Lua::write_header()
 	write(NEW_LINE, NEW_LINE);
 }
 
-void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Statement *> &block)
+void Lua::write_block(const Function &function, const std::vector<Statement *> &block)
 {
-	std::vector<Ast::Statement *> *elseBlock;
+	std::vector<Statement *> *elseBlock;
 	bool isFunctionDefinition;
 	bool previousLineIsEmpty = true;
 
@@ -53,38 +53,38 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 		{
 			switch (block[i - 1]->type)
 			{
-			case Ast::AST_STATEMENT_RETURN:
-				if (block[i]->type != Ast::AST_STATEMENT_RETURN)
+			case AST_STATEMENT_RETURN:
+				if (block[i]->type != AST_STATEMENT_RETURN)
 					previousLineIsEmpty = true;
 				break;
-			case Ast::AST_STATEMENT_GOTO:
-			case Ast::AST_STATEMENT_BREAK:
-				if (block[i]->type != Ast::AST_STATEMENT_GOTO && block[i]->type != Ast::AST_STATEMENT_BREAK)
+			case AST_STATEMENT_GOTO:
+			case AST_STATEMENT_BREAK:
+				if (block[i]->type != AST_STATEMENT_GOTO && block[i]->type != AST_STATEMENT_BREAK)
 					previousLineIsEmpty = true;
 				break;
-			case Ast::AST_STATEMENT_DECLARATION:
-				if (block[i]->type != Ast::AST_STATEMENT_DECLARATION)
+			case AST_STATEMENT_DECLARATION:
+				if (block[i]->type != AST_STATEMENT_DECLARATION)
 					previousLineIsEmpty = true;
 				break;
-			case Ast::AST_STATEMENT_ASSIGNMENT:
-				if (block[i]->type != Ast::AST_STATEMENT_ASSIGNMENT)
+			case AST_STATEMENT_ASSIGNMENT:
+				if (block[i]->type != AST_STATEMENT_ASSIGNMENT)
 					previousLineIsEmpty = true;
 				break;
-			case Ast::AST_STATEMENT_FUNCTION_CALL:
-				if (block[i]->type != Ast::AST_STATEMENT_FUNCTION_CALL)
+			case AST_STATEMENT_FUNCTION_CALL:
+				if (block[i]->type != AST_STATEMENT_FUNCTION_CALL)
 					previousLineIsEmpty = true;
 				break;
-			case Ast::AST_STATEMENT_LABEL:
-				if (block[i]->type != Ast::AST_STATEMENT_LABEL)
+			case AST_STATEMENT_LABEL:
+				if (block[i]->type != AST_STATEMENT_LABEL)
 					previousLineIsEmpty = true;
 				break;
-			case Ast::AST_STATEMENT_NUMERIC_FOR:
-			case Ast::AST_STATEMENT_GENERIC_FOR:
-			case Ast::AST_STATEMENT_IF:
-			case Ast::AST_STATEMENT_ELSE:
-			case Ast::AST_STATEMENT_WHILE:
-			case Ast::AST_STATEMENT_REPEAT:
-			case Ast::AST_STATEMENT_DO:
+			case AST_STATEMENT_NUMERIC_FOR:
+			case AST_STATEMENT_GENERIC_FOR:
+			case AST_STATEMENT_IF:
+			case AST_STATEMENT_ELSE:
+			case AST_STATEMENT_WHILE:
+			case AST_STATEMENT_REPEAT:
+			case AST_STATEMENT_DO:
 				previousLineIsEmpty = true;
 				break;
 			}
@@ -95,7 +95,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 
 		switch (block[i]->type)
 		{
-		case Ast::AST_STATEMENT_RETURN:
+		case AST_STATEMENT_RETURN:
 			write_indent();
 			if (i != block.size() - 1)
 				write("do ");
@@ -110,11 +110,11 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			if (i != block.size() - 1)
 				write(" end");
 			break;
-		case Ast::AST_STATEMENT_GOTO:
+		case AST_STATEMENT_GOTO:
 			write_indent();
 			write("goto ", function.labels[block[i]->instruction.label].name);
 			break;
-		case Ast::AST_STATEMENT_NUMERIC_FOR:
+		case AST_STATEMENT_NUMERIC_FOR:
 			write_indent();
 			write("for ");
 			write_variable(block[i]->assignment.variables.back(), false);
@@ -136,7 +136,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			write_indent();
 			write("end");
 			break;
-		case Ast::AST_STATEMENT_GENERIC_FOR:
+		case AST_STATEMENT_GENERIC_FOR:
 			write_indent();
 			write("for ");
 			write_assignment(block[i]->assignment.variables, block[i]->assignment.expressions, " in ", false);
@@ -147,7 +147,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			write_indent();
 			write("end");
 			break;
-		case Ast::AST_STATEMENT_BREAK:
+		case AST_STATEMENT_BREAK:
 			write_indent();
 			if (i != block.size() - 1)
 				write("do ");
@@ -155,10 +155,10 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			if (i != block.size() - 1)
 				write(" end");
 			break;
-		case Ast::AST_STATEMENT_DECLARATION:
+		case AST_STATEMENT_DECLARATION:
 			isFunctionDefinition = false;
 
-			if (block[i]->assignment.variables.size() == 1 && block[i]->assignment.expressions.size() == 1 && block[i]->assignment.expressions.back()->type == Ast::AST_EXPRESSION_FUNCTION)
+			if (block[i]->assignment.variables.size() == 1 && block[i]->assignment.expressions.size() == 1 && block[i]->assignment.expressions.back()->type == AST_EXPRESSION_FUNCTION)
 			{
 				isFunctionDefinition = true;
 
@@ -209,22 +209,22 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			}
 
 			break;
-		case Ast::AST_STATEMENT_ASSIGNMENT:
+		case AST_STATEMENT_ASSIGNMENT:
 			isFunctionDefinition = false;
 
-			if (block[i]->assignment.variables.size() == 1 && block[i]->assignment.expressions.size() == 1 && block[i]->assignment.expressions.back()->type == Ast::AST_EXPRESSION_FUNCTION)
+			if (block[i]->assignment.variables.size() == 1 && block[i]->assignment.expressions.size() == 1 && block[i]->assignment.expressions.back()->type == AST_EXPRESSION_FUNCTION)
 			{
-				for (Ast::Variable *variable = &block[i]->assignment.variables.back(); true; variable = variable->table->variable)
+				for (Variable *variable = &block[i]->assignment.variables.back(); true; variable = variable->table->variable)
 				{
 					switch (variable->type)
 					{
-					case Ast::AST_VARIABLE_SLOT:
-					case Ast::AST_VARIABLE_UPVALUE:
-					case Ast::AST_VARIABLE_GLOBAL:
+					case AST_VARIABLE_SLOT:
+					case AST_VARIABLE_UPVALUE:
+					case AST_VARIABLE_GLOBAL:
 						isFunctionDefinition = true;
 						break;
-					case Ast::AST_VARIABLE_TABLE_INDEX:
-						if (variable->table->type == Ast::AST_EXPRESSION_VARIABLE && variable->tableIndex->type == Ast::AST_EXPRESSION_CONSTANT && variable->tableIndex->constant->isName)
+					case AST_VARIABLE_TABLE_INDEX:
+						if (variable->table->type == AST_EXPRESSION_VARIABLE && variable->tableIndex->type == AST_EXPRESSION_CONSTANT && variable->tableIndex->constant->isName)
 							continue;
 					}
 
@@ -239,7 +239,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 				write_indent();
 				write("function ");
 
-				if (block[i]->assignment.variables.back().type == Ast::AST_VARIABLE_TABLE_INDEX && block[i]->assignment.expressions.back()->function->parameterNames.size() && block[i]->assignment.expressions.back()->function->parameterNames.front() == "self")
+				if (block[i]->assignment.variables.back().type == AST_VARIABLE_TABLE_INDEX && block[i]->assignment.expressions.back()->function->parameterNames.size() && block[i]->assignment.expressions.back()->function->parameterNames.front() == "self")
 				{
 					write_variable(*block[i]->assignment.variables.back().table->variable, false);
 					write(":", block[i]->assignment.variables.back().tableIndex->constant->string);
@@ -264,11 +264,11 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			write_indent();
 			write_assignment(block[i]->assignment.variables, block[i]->assignment.expressions, " = ", i);
 			break;
-		case Ast::AST_STATEMENT_FUNCTION_CALL:
+		case AST_STATEMENT_FUNCTION_CALL:
 			write_indent();
 			write_function_call(*block[i]->assignment.expressions.back()->functionCall, i);
 			break;
-		case Ast::AST_STATEMENT_IF:
+		case AST_STATEMENT_IF:
 			write_indent();
 			write("if ");
 			write_expression(*block[i]->assignment.expressions.back(), false);
@@ -278,14 +278,14 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			indentLevel--;
 			write_indent();
 
-			if (i + 1 < block.size() && block[i + 1]->type == Ast::AST_STATEMENT_ELSE)
+			if (i + 1 < block.size() && block[i + 1]->type == AST_STATEMENT_ELSE)
 			{
 				i++;
 				elseBlock = &block[i]->block;
 
 				while (true)
 				{
-					if (elseBlock->size() == 1 && elseBlock->front()->type == Ast::AST_STATEMENT_IF)
+					if (elseBlock->size() == 1 && elseBlock->front()->type == AST_STATEMENT_IF)
 					{
 						write("elseif ");
 						write_expression(*elseBlock->front()->assignment.expressions.back(), false);
@@ -295,7 +295,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 						indentLevel--;
 						write_indent();
 					}
-					else if (elseBlock->size() == 2 && elseBlock->front()->type == Ast::AST_STATEMENT_IF && elseBlock->back()->type == Ast::AST_STATEMENT_ELSE)
+					else if (elseBlock->size() == 2 && elseBlock->front()->type == AST_STATEMENT_IF && elseBlock->back()->type == AST_STATEMENT_ELSE)
 					{
 						write("elseif ");
 						write_expression(*elseBlock->front()->assignment.expressions.back(), false);
@@ -322,7 +322,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 
 			write("end");
 			break;
-		case Ast::AST_STATEMENT_WHILE:
+		case AST_STATEMENT_WHILE:
 			write_indent();
 			write("while ");
 			write_expression(*block[i]->assignment.expressions.back(), false);
@@ -333,7 +333,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			write_indent();
 			write("end");
 			break;
-		case Ast::AST_STATEMENT_REPEAT:
+		case AST_STATEMENT_REPEAT:
 			write_indent();
 			write("repeat", NEW_LINE);
 			indentLevel++;
@@ -343,7 +343,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			write("until ");
 			write_expression(*block[i]->assignment.expressions.back(), false);
 			break;
-		case Ast::AST_STATEMENT_DO:
+		case AST_STATEMENT_DO:
 			write_indent();
 			write("do", NEW_LINE);
 			indentLevel++;
@@ -352,7 +352,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 			write_indent();
 			write("end");
 			break;
-		case Ast::AST_STATEMENT_LABEL:
+		case AST_STATEMENT_LABEL:
 			write_indent();
 			write("::", function.labels[block[i]->instruction.label].name, "::");
 			break;
@@ -365,7 +365,7 @@ void Lua::write_block(const Ast::Function &function, const std::vector<Ast::Stat
 	}
 }
 
-void Lua::write_expression(const Ast::Expression &expression, const bool &useParentheses)
+void Lua::write_expression(const Expression &expression, const bool &useParentheses)
 {
 	uint32_t nextListIndex, nextFieldIndex;
 	uint8_t operatorPrecedence, operandPrecedence;
@@ -375,32 +375,32 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 
 	switch (expression.type)
 	{
-	case Ast::AST_EXPRESSION_CONSTANT:
+	case AST_EXPRESSION_CONSTANT:
 		switch (expression.constant->type)
 		{
-		case Ast::AST_CONSTANT_NIL:
+		case AST_CONSTANT_NIL:
 			write("nil");
 			break;
-		case Ast::AST_CONSTANT_FALSE:
+		case AST_CONSTANT_FALSE:
 			write("false");
 			break;
-		case Ast::AST_CONSTANT_TRUE:
+		case AST_CONSTANT_TRUE:
 			write("true");
 			break;
-		case Ast::AST_CONSTANT_NUMBER:
+		case AST_CONSTANT_NUMBER:
 			write_number(expression.constant->number);
 			break;
-		case Ast::AST_CONSTANT_CDATA_SIGNED:
+		case AST_CONSTANT_CDATA_SIGNED:
 			write(std::to_string(expression.constant->signed_integer), "LL");
 			break;
-		case Ast::AST_CONSTANT_CDATA_UNSIGNED:
+		case AST_CONSTANT_CDATA_UNSIGNED:
 			write(std::to_string(expression.constant->unsigned_integer), "ULL");
 			break;
-		case Ast::AST_CONSTANT_CDATA_IMAGINARY:
+		case AST_CONSTANT_CDATA_IMAGINARY:
 			write_number(expression.constant->number);
 			write("i");
 			break;
-		case Ast::AST_CONSTANT_STRING:
+		case AST_CONSTANT_STRING:
 			write("\"");
 			write_string(expression.constant->string);
 			write("\"");
@@ -408,20 +408,20 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 		}
 
 		break;
-	case Ast::AST_EXPRESSION_VARARG:
+	case AST_EXPRESSION_VARARG:
 		write("...");
 		break;
-	case Ast::AST_EXPRESSION_FUNCTION:
+	case AST_EXPRESSION_FUNCTION:
 		write("function");
 		write_function_definition(*expression.function, false);
 		break;
-	case Ast::AST_EXPRESSION_VARIABLE:
+	case AST_EXPRESSION_VARIABLE:
 		write_variable(*expression.variable, false);
 		break;
-	case Ast::AST_EXPRESSION_FUNCTION_CALL:
+	case AST_EXPRESSION_FUNCTION_CALL:
 		write_function_call(*expression.functionCall, false);
 		break;
-	case Ast::AST_EXPRESSION_TABLE:
+	case AST_EXPRESSION_TABLE:
 		if (!expression.table->constants.list.size() && !expression.table->constants.fields.size() && !expression.table->fields.size() && !expression.table->multresField)
 		{
 			write("{}");
@@ -435,7 +435,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 		nextFieldIndex = 0;
 		isFirstField = true;
 
-		if (expression.table->constants.list.size() && expression.table->constants.list.front()->constant->type != Ast::AST_CONSTANT_NIL)
+		if (expression.table->constants.list.size() && expression.table->constants.list.front()->constant->type != AST_CONSTANT_NIL)
 		{
 			write("[0] = ");
 			write_expression(*expression.table->constants.list.front(), false);
@@ -444,7 +444,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 
 		while (!expression.table->multresField || nextListIndex < expression.table->multresIndex)
 		{
-			if (nextListIndex < expression.table->constants.list.size() && expression.table->constants.list[nextListIndex]->constant->type != Ast::AST_CONSTANT_NIL)
+			if (nextListIndex < expression.table->constants.list.size() && expression.table->constants.list[nextListIndex]->constant->type != AST_CONSTANT_NIL)
 			{
 				if (!isFirstField)
 				{
@@ -462,7 +462,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 
 			for (uint32_t i = nextFieldIndex; i < expression.table->fields.size(); i++)
 			{
-				if (expression.table->fields[i].key->type != Ast::AST_EXPRESSION_CONSTANT || expression.table->fields[i].key->constant->type != Ast::AST_CONSTANT_NUMBER || expression.table->fields[i].key->constant->number != nextListIndex)
+				if (expression.table->fields[i].key->type != AST_EXPRESSION_CONSTANT || expression.table->fields[i].key->constant->type != AST_CONSTANT_NUMBER || expression.table->fields[i].key->constant->number != nextListIndex)
 					continue;
 				isFieldFound = true;
 
@@ -474,7 +474,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 						write_indent();
 					}
 
-					if (expression.table->fields[nextFieldIndex].key->type == Ast::AST_EXPRESSION_CONSTANT && expression.table->fields[nextFieldIndex].key->constant->isName)
+					if (expression.table->fields[nextFieldIndex].key->type == AST_EXPRESSION_CONSTANT && expression.table->fields[nextFieldIndex].key->constant->isName)
 					{
 						write(expression.table->fields[nextFieldIndex].key->constant->string);
 					}
@@ -506,8 +506,8 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 				{
 					switch (expression.table->fields.back().value->type)
 					{
-					case Ast::AST_EXPRESSION_VARARG:
-					case Ast::AST_EXPRESSION_FUNCTION_CALL:
+					case AST_EXPRESSION_VARARG:
+					case AST_EXPRESSION_FUNCTION_CALL:
 						write_expression(*expression.table->fields.back().value, true);
 						break;
 					default:
@@ -544,7 +544,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 
 		for (uint32_t i = nextListIndex; i < expression.table->constants.list.size(); i++)
 		{
-			if (expression.table->constants.list[i]->constant->type == Ast::AST_CONSTANT_NIL)
+			if (expression.table->constants.list[i]->constant->type == AST_CONSTANT_NIL)
 				continue;
 
 			if (!isFirstField)
@@ -590,7 +590,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 				write_indent();
 			}
 
-			if (expression.table->fields[i].key->type == Ast::AST_EXPRESSION_CONSTANT && expression.table->fields[i].key->constant->isName)
+			if (expression.table->fields[i].key->type == AST_EXPRESSION_CONSTANT && expression.table->fields[i].key->constant->isName)
 			{
 				write(expression.table->fields[i].key->constant->string);
 			}
@@ -624,7 +624,7 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 		write_indent();
 		write("}");
 		break;
-	case Ast::AST_EXPRESSION_BINARY_OPERATION:
+	case AST_EXPRESSION_BINARY_OPERATION:
 		operatorPrecedence = get_operator_precedence(expression);
 		operandPrecedence = get_operator_precedence(*expression.binaryOperation->leftOperand);
 		parentheses = false;
@@ -642,16 +642,16 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 		{
 			parentheses = true;
 		}
-		else if (operatorPrecedence == 7 && expression.binaryOperation->leftOperand->type == Ast::AST_EXPRESSION_CONSTANT)
+		else if (operatorPrecedence == 7 && expression.binaryOperation->leftOperand->type == AST_EXPRESSION_CONSTANT)
 		{
 			switch (expression.binaryOperation->leftOperand->constant->type)
 			{
-			case Ast::AST_CONSTANT_NUMBER:
-			case Ast::AST_CONSTANT_CDATA_IMAGINARY:
+			case AST_CONSTANT_NUMBER:
+			case AST_CONSTANT_CDATA_IMAGINARY:
 				if (std::bit_cast<uint64_t>(expression.binaryOperation->leftOperand->constant->number) & DOUBLE_SIGN)
 					parentheses = true;
 				break;
-			case Ast::AST_CONSTANT_CDATA_SIGNED:
+			case AST_CONSTANT_CDATA_SIGNED:
 				if (expression.binaryOperation->leftOperand->constant->signed_integer < 0)
 					parentheses = true;
 				break;
@@ -662,56 +662,56 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 
 		switch (expression.binaryOperation->type)
 		{
-		case Ast::AST_BINARY_ADDITION:
+		case AST_BINARY_ADDITION:
 			write(" + ");
 			break;
-		case Ast::AST_BINARY_SUBTRACTION:
+		case AST_BINARY_SUBTRACTION:
 			write(" - ");
 			break;
-		case Ast::AST_BINARY_MULTIPLICATION:
+		case AST_BINARY_MULTIPLICATION:
 			write(" * ");
 			break;
-		case Ast::AST_BINARY_DIVISION:
+		case AST_BINARY_DIVISION:
 			write(" / ");
 			break;
-		case Ast::AST_BINARY_EXPONENTATION:
+		case AST_BINARY_EXPONENTATION:
 			write("^");
 			break;
-		case Ast::AST_BINARY_MODULO:
+		case AST_BINARY_MODULO:
 			write(" % ");
 			break;
-		case Ast::AST_BINARY_CONCATENATION:
+		case AST_BINARY_CONCATENATION:
 			write(" .. ");
 			break;
-		case Ast::AST_BINARY_LESS_THAN:
+		case AST_BINARY_LESS_THAN:
 			write(" < ");
 			break;
-		case Ast::AST_BINARY_LESS_EQUAL:
+		case AST_BINARY_LESS_EQUAL:
 			write(" <= ");
 			break;
-		case Ast::AST_BINARY_GREATER_THEN:
+		case AST_BINARY_GREATER_THEN:
 			write(" > ");
 			break;
-		case Ast::AST_BINARY_GREATER_EQUAL:
+		case AST_BINARY_GREATER_EQUAL:
 			write(" >= ");
 			break;
-		case Ast::AST_BINARY_EQUAL:
+		case AST_BINARY_EQUAL:
 			write(" == ");
 			break;
-		case Ast::AST_BINARY_NOT_EQUAL:
+		case AST_BINARY_NOT_EQUAL:
 			write(" ~= ");
 			break;
-		case Ast::AST_BINARY_AND:
+		case AST_BINARY_AND:
 			write(" and ");
 			break;
-		case Ast::AST_BINARY_OR:
+		case AST_BINARY_OR:
 			write(" or ");
 			break;
 		}
 
 		parentheses = false;
 
-		if (expression.binaryOperation->rightOperand->type == Ast::AST_EXPRESSION_BINARY_OPERATION)
+		if (expression.binaryOperation->rightOperand->type == AST_EXPRESSION_BINARY_OPERATION)
 		{
 			operandPrecedence = get_operator_precedence(*expression.binaryOperation->rightOperand);
 
@@ -733,20 +733,20 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 
 		write_expression(*expression.binaryOperation->rightOperand, parentheses);
 		break;
-	case Ast::AST_EXPRESSION_UNARY_OPERATION:
+	case AST_EXPRESSION_UNARY_OPERATION:
 		parentheses = get_operator_precedence(*expression.unaryOperation->operand) < 6;
 
 		switch (expression.unaryOperation->type)
 		{
-		case Ast::AST_UNARY_MINUS:
-			if (!parentheses && expression.unaryOperation->operand->type == Ast::AST_EXPRESSION_UNARY_OPERATION && expression.unaryOperation->operand->unaryOperation->type == Ast::AST_UNARY_MINUS)
+		case AST_UNARY_MINUS:
+			if (!parentheses && expression.unaryOperation->operand->type == AST_EXPRESSION_UNARY_OPERATION && expression.unaryOperation->operand->unaryOperation->type == AST_UNARY_MINUS)
 				parentheses = true;
 			write("-");
 			break;
-		case Ast::AST_UNARY_NOT:
+		case AST_UNARY_NOT:
 			write("not ");
 			break;
-		case Ast::AST_UNARY_LENGTH:
+		case AST_UNARY_LENGTH:
 			write("#");
 			break;
 		}
@@ -759,14 +759,14 @@ void Lua::write_expression(const Ast::Expression &expression, const bool &usePar
 		write(")");
 }
 
-void Lua::write_prefix_expression(const Ast::Expression &expression, const bool &isLineStart)
+void Lua::write_prefix_expression(const Expression &expression, const bool &isLineStart)
 {
 	switch (expression.type)
 	{
-	case Ast::AST_EXPRESSION_VARIABLE:
+	case AST_EXPRESSION_VARIABLE:
 		write_variable(*expression.variable, isLineStart);
 		break;
-	case Ast::AST_EXPRESSION_FUNCTION_CALL:
+	case AST_EXPRESSION_FUNCTION_CALL:
 		write_function_call(*expression.functionCall, isLineStart);
 		break;
 	default:
@@ -777,23 +777,23 @@ void Lua::write_prefix_expression(const Ast::Expression &expression, const bool 
 	}
 }
 
-void Lua::write_variable(const Ast::Variable &variable, const bool &isLineStart)
+void Lua::write_variable(const Variable &variable, const bool &isLineStart)
 {
 	switch (variable.type)
 	{
-	case Ast::AST_VARIABLE_SLOT:
-	case Ast::AST_VARIABLE_UPVALUE:
+	case AST_VARIABLE_SLOT:
+	case AST_VARIABLE_UPVALUE:
 		if (!(*variable.slotScope)->name.size())
 			throw nullptr;
 		write((*variable.slotScope)->name);
 		break;
-	case Ast::AST_VARIABLE_GLOBAL:
+	case AST_VARIABLE_GLOBAL:
 		write(variable.name);
 		break;
-	case Ast::AST_VARIABLE_TABLE_INDEX:
+	case AST_VARIABLE_TABLE_INDEX:
 		write_prefix_expression(*variable.table, isLineStart);
 
-		if (variable.tableIndex->type == Ast::AST_EXPRESSION_CONSTANT && variable.tableIndex->constant->isName)
+		if (variable.tableIndex->type == AST_EXPRESSION_CONSTANT && variable.tableIndex->constant->isName)
 		{
 			write(".", variable.tableIndex->constant->string);
 			break;
@@ -806,7 +806,7 @@ void Lua::write_variable(const Ast::Variable &variable, const bool &isLineStart)
 	}
 }
 
-void Lua::write_function_call(const Ast::FunctionCall &functionCall, const bool &isLineStart)
+void Lua::write_function_call(const FunctionCall &functionCall, const bool &isLineStart)
 {
 	if (functionCall.isMethod)
 	{
@@ -823,7 +823,7 @@ void Lua::write_function_call(const Ast::FunctionCall &functionCall, const bool 
 	write(")");
 }
 
-void Lua::write_assignment(const std::vector<Ast::Variable> &variables, const std::vector<Ast::Expression *> &expressions, const std::string &seperator, const bool &isLineStart)
+void Lua::write_assignment(const std::vector<Variable> &variables, const std::vector<Expression *> &expressions, const std::string &seperator, const bool &isLineStart)
 {
 	for (uint8_t i = 0; i < variables.size(); i++)
 	{
@@ -849,7 +849,7 @@ void Lua::write_assignment(const std::vector<Ast::Variable> &variables, const st
 		{
 			switch (expressions[i]->type)
 			{
-			case Ast::AST_EXPRESSION_VARARG:
+			case AST_EXPRESSION_VARARG:
 				if (expressions[i]->returnCount == 1)
 				{
 					write_expression(*expressions[i], true);
@@ -857,7 +857,7 @@ void Lua::write_assignment(const std::vector<Ast::Variable> &variables, const st
 				}
 
 				break;
-			case Ast::AST_EXPRESSION_FUNCTION_CALL:
+			case AST_EXPRESSION_FUNCTION_CALL:
 				if (expressions[i]->functionCall->returnCount == 1)
 				{
 					write_expression(*expressions[i], true);
@@ -872,7 +872,7 @@ void Lua::write_assignment(const std::vector<Ast::Variable> &variables, const st
 	}
 }
 
-void Lua::write_expression_list(const std::vector<Ast::Expression *> &expressions, const Ast::Expression *const &multres)
+void Lua::write_expression_list(const std::vector<Expression *> &expressions, const Expression *const &multres)
 {
 	for (uint8_t i = 0; i < expressions.size(); i++)
 	{
@@ -885,8 +885,8 @@ void Lua::write_expression_list(const std::vector<Ast::Expression *> &expression
 
 		switch (expressions[i]->type)
 		{
-		case Ast::AST_EXPRESSION_VARARG:
-		case Ast::AST_EXPRESSION_FUNCTION_CALL:
+		case AST_EXPRESSION_VARARG:
+		case AST_EXPRESSION_FUNCTION_CALL:
 			write_expression(*expressions[i], true);
 			continue;
 		}
@@ -898,7 +898,7 @@ void Lua::write_expression_list(const std::vector<Ast::Expression *> &expression
 		write_expression(*multres, false);
 }
 
-void Lua::write_function_definition(const Ast::Function &function, const bool &isMethod)
+void Lua::write_function_definition(const Function &function, const bool &isMethod)
 {
 	write("(");
 
@@ -1079,37 +1079,37 @@ void Lua::write_string(const std::string &string)
 	}
 }
 
-uint8_t Lua::get_operator_precedence(const Ast::Expression &expression)
+uint8_t Lua::get_operator_precedence(const Expression &expression)
 {
 	switch (expression.type)
 	{
-	case Ast::AST_EXPRESSION_BINARY_OPERATION:
+	case AST_EXPRESSION_BINARY_OPERATION:
 		switch (expression.binaryOperation->type)
 		{
-		case Ast::AST_BINARY_EXPONENTATION:
+		case AST_BINARY_EXPONENTATION:
 			return 7;
-		case Ast::AST_BINARY_MULTIPLICATION:
-		case Ast::AST_BINARY_DIVISION:
-		case Ast::AST_BINARY_MODULO:
+		case AST_BINARY_MULTIPLICATION:
+		case AST_BINARY_DIVISION:
+		case AST_BINARY_MODULO:
 			return 5;
-		case Ast::AST_BINARY_ADDITION:
-		case Ast::AST_BINARY_SUBTRACTION:
+		case AST_BINARY_ADDITION:
+		case AST_BINARY_SUBTRACTION:
 			return 4;
-		case Ast::AST_BINARY_CONCATENATION:
+		case AST_BINARY_CONCATENATION:
 			return 3;
-		case Ast::AST_BINARY_LESS_THAN:
-		case Ast::AST_BINARY_LESS_EQUAL:
-		case Ast::AST_BINARY_GREATER_THEN:
-		case Ast::AST_BINARY_GREATER_EQUAL:
-		case Ast::AST_BINARY_EQUAL:
-		case Ast::AST_BINARY_NOT_EQUAL:
+		case AST_BINARY_LESS_THAN:
+		case AST_BINARY_LESS_EQUAL:
+		case AST_BINARY_GREATER_THEN:
+		case AST_BINARY_GREATER_EQUAL:
+		case AST_BINARY_EQUAL:
+		case AST_BINARY_NOT_EQUAL:
 			return 2;
-		case Ast::AST_BINARY_AND:
+		case AST_BINARY_AND:
 			return 1;
-		case Ast::AST_BINARY_OR:
+		case AST_BINARY_OR:
 			return 0;
 		}
-	case Ast::AST_EXPRESSION_UNARY_OPERATION:
+	case AST_EXPRESSION_UNARY_OPERATION:
 		return 6;
 	}
 

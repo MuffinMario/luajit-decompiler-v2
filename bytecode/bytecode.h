@@ -1,16 +1,17 @@
+#include <fstream>
+class Prototype;
+struct BConstant;
+struct NumberConstant;
+struct TableConstant;
+struct TableNode;
+struct VariableInfo;
+struct Instruction;
+#include "prototype.h"
+#include "constants.h"
+#include "instructions.h"
 class Bytecode {
 public:
 
-	class Prototype;
-	struct Constant;
-	struct NumberConstant;
-	struct TableConstant;
-	struct TableNode;
-	struct VariableInfo;
-	struct Instruction;
-	#include "prototype.h"
-	#include "constants.h"
-	#include "instructions.h"
 
 	Bytecode(const std::string& filePath);
 	~Bytecode();
@@ -41,9 +42,17 @@ private:
 	uint32_t read_uleb128();
 	bool buffer_next_block();
 
-	HANDLE file = INVALID_HANDLE_VALUE;
+	std::ifstream file;
 	uint64_t fileSize = 0;
 	uint64_t bytesUnread = 0;
 	std::vector<uint8_t> fileBuffer;
 	std::vector<Prototype*> prototypes;
+
+	friend class Prototype;
+friend struct BConstant;
+friend struct NumberConstant;
+friend struct TableConstant;
+friend struct TableNode;
+friend struct VariableInfo;
+friend struct Instruction;
 };

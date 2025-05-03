@@ -1,4 +1,4 @@
-struct Ast::Local {
+struct Local {
 	std::vector<std::string> names;
 	uint8_t baseSlot = 0;
 	uint32_t scopeBegin = INVALID_ID;
@@ -6,7 +6,7 @@ struct Ast::Local {
 	bool excludeBlock = false;
 };
 
-struct Ast::SlotScope {
+struct SlotScope {
 	SlotScope* slotScope = this;
 	std::string name;
 	uint32_t scopeBegin = INVALID_ID;
@@ -14,7 +14,7 @@ struct Ast::SlotScope {
 	uint32_t usages = 0;
 };
 
-struct Ast::Function {
+struct Function {
 	struct Upvalue {
 		uint8_t slot = 0;
 		SlotScope** slotScope = nullptr;
@@ -27,8 +27,8 @@ struct Ast::Function {
 		std::vector<uint32_t> jumpIds;
 	};
 
-	Function(const Bytecode::Prototype& prototype, const uint32_t& level, const bool& ignoreDebugInfo)
-		: prototype(prototype), isVariadic(prototype.header.flags& Bytecode::BC_PROTO_VARARG), level(level), hasDebugInfo(!ignoreDebugInfo && prototype.header.hasDebugInfo) {
+	Function(const Prototype& prototype, const uint32_t& level, const bool& ignoreDebugInfo)
+		: prototype(prototype), isVariadic(prototype.header.flags& BC_PROTO_VARARG), level(level), hasDebugInfo(!ignoreDebugInfo && prototype.header.hasDebugInfo) {
 		slotScopeCollector.slotInfos.resize(prototype.header.framesize);
 
 		for (uint8_t i = prototype.header.parameters; i--;) {
@@ -45,11 +45,11 @@ struct Ast::Function {
 		}
 	}
 
-	const Bytecode::Constant& get_constant(const uint16_t& index) const {
+	const BConstant& get_constant(const uint16_t& index) const {
 		return prototype.constants[prototype.constants.size() - 1 - index];
 	}
 
-	const Bytecode::NumberConstant& get_number_constant(const uint16_t& index) const {
+	const NumberConstant& get_number_constant(const uint16_t& index) const {
 		return prototype.numberConstants[index];
 	}
 
@@ -136,7 +136,7 @@ struct Ast::Function {
 		return true;
 	}
 
-	const Bytecode::Prototype& prototype;
+	const Prototype& prototype;
 	const bool isVariadic, hasDebugInfo;
 	const uint32_t level;
 	uint32_t id = 0;
