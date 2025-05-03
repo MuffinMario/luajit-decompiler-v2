@@ -7,6 +7,7 @@ full support for gotos and stripped bytecode including locals and upvalues.
 ## Installation (Unix)
 
 1. run `sudo make install`
+    * This will build and install the executable under /usr/local/bin/ljdec2 
 
 ## Changes from original branch
 
