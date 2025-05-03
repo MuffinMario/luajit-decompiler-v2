@@ -4,6 +4,16 @@
 The project fixes all of the bugs and quirks the python decompiler had while also offering  
 full support for gotos and stripped bytecode including locals and upvalues.
 
+## Installation (Unix)
+
+1. run `sudo make install`
+
+## Changes from original branch
+
+* Adapted WINAPI calls to STL filesystem / fstream headers if possible
+* If functions can't be adapted through STL, usage of unix approximating functions has been used.
+* Default working directory changed from `<executable path>` to `<current working directory>`
+
 ## Usage
 
 1. Head to the release section and download the latest executable.
