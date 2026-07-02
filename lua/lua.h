@@ -3,7 +3,7 @@
 class Lua {
 public:
 
-	Lua(const Bytecode& bytecode, const Ast& ast, const std::string& filePath, const bool& forceOverwrite, const bool& minimizeDiffs, const bool& unrestrictedAscii);
+	Lua(const Bytecode& bytecode, const Ast& ast, const std::string& filePath, const bool& forceOverwrite, const bool& minimizeDiffs, const bool& unrestrictedAscii, const bool& orderTableAlphabetic);
 	~Lua();
 
 	void operator()();
@@ -40,6 +40,7 @@ private:
 	const bool forceOverwrite;
 	const bool minimizeDiffs;
 	const bool unrestrictedAscii;
+	const bool orderTableAlphabetic;
 	std::ofstream file;
 	std::string writeBuffer;
 	uint32_t indentLevel = 0;

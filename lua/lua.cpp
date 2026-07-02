@@ -1,7 +1,8 @@
 #include "../main.h"
+#include <algorithm>
 
-Lua::Lua(const Bytecode &bytecode, const Ast &ast, const std::string &filePath, const bool &forceOverwrite, const bool &minimizeDiffs, const bool &unrestrictedAscii)
-	: bytecode(bytecode), ast(ast), filePath(filePath), forceOverwrite(forceOverwrite), minimizeDiffs(minimizeDiffs), unrestrictedAscii(unrestrictedAscii) {}
+Lua::Lua(const Bytecode &bytecode, const Ast &ast, const std::string &filePath, const bool &forceOverwrite, const bool &minimizeDiffs, const bool &unrestrictedAscii, const bool &orderTableAlphabetic)
+	: bytecode(bytecode), ast(ast), filePath(filePath), forceOverwrite(forceOverwrite), minimizeDiffs(minimizeDiffs), unrestrictedAscii(unrestrictedAscii), orderTableAlphabetic(orderTableAlphabetic) {}
 
 Lua::~Lua()
 {
@@ -558,52 +559,96 @@ void Lua::write_expression(const Expression &expression, const bool &useParenthe
 			isFirstField = false;
 		}
 
-		for (uint32_t i = 0; i < expression.table->constants.fields.size(); i++)
 		{
-			if (!isFirstField)
+			std::vector<uint32_t> sortedIndices;
+			if (orderTableAlphabetic && expression.table->constants.fields.size())
 			{
-				write(",", NEW_LINE);
-				write_indent();
+				sortedIndices.resize(expression.table->constants.fields.size());
+				for (uint32_t j = 0; j < sortedIndices.size(); j++)
+					sortedIndices[j] = j;
+				std::sort(sortedIndices.begin(), sortedIndices.end(), [&](uint32_t a, uint32_t b) {
+					auto &sa = expression.table->constants.fields[a].key->constant->string;
+					auto &sb = expression.table->constants.fields[b].key->constant->string;
+					if (sa != sb) return sa < sb; // order by string order first
+					return a < b; // in case of equal name else
+				});
 			}
 
-			if (expression.table->constants.fields[i].key->constant->isName)
+			for (uint32_t idx = 0; idx < expression.table->constants.fields.size(); idx++)
 			{
-				write(expression.table->constants.fields[i].key->constant->string);
-			}
-			else
-			{
-				write("[");
-				write_expression(*expression.table->constants.fields[i].key, false);
-				write("]");
-			}
+				uint32_t i = orderTableAlphabetic ? sortedIndices[idx] : idx;
 
-			write(" = ");
-			write_expression(*expression.table->constants.fields[i].value, false);
-			isFirstField = false;
+				if (!isFirstField)
+				{
+					write(",", NEW_LINE);
+					write_indent();
+				}
+
+				if (expression.table->constants.fields[i].key->constant->isName)
+				{
+					write(expression.table->constants.fields[i].key->constant->string);
+				}
+				else
+				{
+					write("[");
+					write_expression(*expression.table->constants.fields[i].key, false);
+					write("]");
+				}
+
+				write(" = ");
+				write_expression(*expression.table->constants.fields[i].value, false);
+				isFirstField = false;
+			}
 		}
 
-		for (uint32_t i = nextFieldIndex; i < expression.table->fields.size(); i++)
 		{
-			if (!isFirstField)
+			std::vector<uint32_t> sortedIndices;
+			if (orderTableAlphabetic)
 			{
-				write(",", NEW_LINE);
-				write_indent();
+				uint32_t count = expression.table->fields.size() - nextFieldIndex;
+				sortedIndices.resize(count);
+				for (uint32_t j = 0; j < count; j++)
+					sortedIndices[j] = nextFieldIndex + j;
+				std::sort(sortedIndices.begin(), sortedIndices.end(), [&](uint32_t a, uint32_t b) {
+					bool aIsName = expression.table->fields[a].key->type == AST_EXPRESSION_CONSTANT && expression.table->fields[a].key->constant->isName;
+					bool bIsName = expression.table->fields[b].key->type == AST_EXPRESSION_CONSTANT && expression.table->fields[b].key->constant->isName;
+					if (aIsName && bIsName) {
+						auto &sa = expression.table->fields[a].key->constant->string;
+						auto &sb = expression.table->fields[b].key->constant->string;
+						if (sa != sb) return sa < sb;
+						return a < b;
+					}
+					if (aIsName != bIsName)
+						return aIsName;
+					return a < b;
+				});
 			}
 
-			if (expression.table->fields[i].key->type == AST_EXPRESSION_CONSTANT && expression.table->fields[i].key->constant->isName)
+			for (uint32_t idx = 0; idx < expression.table->fields.size() - nextFieldIndex; idx++)
 			{
-				write(expression.table->fields[i].key->constant->string);
-			}
-			else
-			{
-				write("[");
-				write_expression(*expression.table->fields[i].key, false);
-				write("]");
-			}
+				uint32_t i = orderTableAlphabetic ? sortedIndices[idx] : (nextFieldIndex + idx);
 
-			write(" = ");
-			write_expression(*expression.table->fields[i].value, false);
-			isFirstField = false;
+				if (!isFirstField)
+				{
+					write(",", NEW_LINE);
+					write_indent();
+				}
+
+				if (expression.table->fields[i].key->type == AST_EXPRESSION_CONSTANT && expression.table->fields[i].key->constant->isName)
+				{
+					write(expression.table->fields[i].key->constant->string);
+				}
+				else
+				{
+					write("[");
+					write_expression(*expression.table->fields[i].key, false);
+					write("]");
+				}
+
+				write(" = ");
+				write_expression(*expression.table->fields[i].value, false);
+				isFirstField = false;
+			}
 		}
 
 		if (expression.table->multresField)

@@ -103,6 +103,7 @@ static struct
 	bool ignoreDebugInfo = false;
 	bool minimizeDiffs = false;
 	bool unrestrictedAscii = false;
+	bool orderTableAlphabetic = false;
 	std::string inputPath;
 	std::string outputPath;
 	std::string extensionFilter;
@@ -234,7 +235,7 @@ static bool decompile_files_recursively(const Directory &directory)
 
 		Bytecode bytecode(arguments.inputPath + directory.path + directory.files[i]);
 		Ast ast(bytecode, arguments.ignoreDebugInfo, arguments.minimizeDiffs);
-		Lua lua(bytecode, ast, arguments.outputPath + directory.path + outputFile, arguments.forceOverwrite, arguments.minimizeDiffs, arguments.unrestrictedAscii);
+		Lua lua(bytecode, ast, arguments.outputPath + directory.path + outputFile, arguments.forceOverwrite, arguments.minimizeDiffs, arguments.unrestrictedAscii, arguments.orderTableAlphabetic);
 
 		try
 		{
@@ -390,6 +391,11 @@ static char *parse_arguments(const int &argc, char **const &argv)
 					arguments.unrestrictedAscii = true;
 					continue;
 				}
+				else if (argument == "order_table_alphabetic")
+				{
+					arguments.orderTableAlphabetic = true;
+					continue;
+				}
 			}
 			else if (argument.size() == 2)
 			{
@@ -425,6 +431,9 @@ static char *parse_arguments(const int &argc, char **const &argv)
 					continue;
 				case 'u':
 					arguments.unrestrictedAscii = true;
+					continue;
+				case 't':
+					arguments.orderTableAlphabetic = true;
 					continue;
 				}
 			}
@@ -494,7 +503,8 @@ int main(int argc, char *argv[])
 			"  -f, --force_overwrite\t\tAlways overwrite existing files\n"
 			"  -i, --ignore_debug_info\tIgnore bytecode debug info\n"
 			"  -m, --minimize_diffs\t\tOptimize output formatting to help minimize diffs\n"
-			"  -u, --unrestricted_ascii\tDisable default UTF-8 encoding and string restrictions");
+			"  -u, --unrestricted_ascii\tDisable default UTF-8 encoding and string restrictions\n"
+			"  -t, --order_table_alphabetic\tOutput table keys sorted alphabetically");
 		return EXIT_SUCCESS;
 	}
 
