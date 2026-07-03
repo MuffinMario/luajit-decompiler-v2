@@ -325,8 +325,11 @@ static char *parse_arguments(const int &argc, char **const &argv)
 		return nullptr;
 	arguments.inputPath = argv[1];
 #ifndef _DEBUG
+	// support for file drag on windows exclusive behavior, on linux this breaks when no tty is applied
+#ifdef _WIN32
 	if (!isCommandLine)
 		return nullptr;
+#endif
 #endif
 	bool isInputPathSet = true;
 
@@ -459,7 +462,13 @@ int main(int argc, char *argv[])
 
 #ifdef __linux__
 	{
+#ifdef _DEBUG
 		isCommandLine = false;
+#else
+		// determine it being in a command line if file descriptors
+		// are attached to a terminal device
+		isCommandLine = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
+#endif
 	}
 #elif _WIN32
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
