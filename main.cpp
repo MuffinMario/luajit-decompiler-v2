@@ -459,13 +459,7 @@ int main(int argc, char *argv[])
 
 #ifdef __linux__
 	{
-#ifdef _DEBUG
 		isCommandLine = false;
-#else
-		// determine it being in a command line if file descriptors
-		// are attached to a terminal device
-		isCommandLine = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
-#endif
 	}
 #elif _WIN32
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
